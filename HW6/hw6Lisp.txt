@@ -1,0 +1,74 @@
+
+;;; Accepts a list, does a shallow removal of all nil at the top level of the list passed as an argument
+(defun removeNILTop (L)
+            ;; Base condition; if L is NIL, return NIL
+    (cond ((NULL L) NIL) 
+            ;; If the first element is NIL, remove it and recursively process the rest of the list
+            ((NULL (CAR L)) (removeNILTop (CDR L))) 
+            ;; Otherwise, add the first element to the recursively processed rest of the list
+            (T (CONS (CAR L) (removeNILTop (CDR L)))) 
+    )
+)
+
+;;; Accepts a list, recursively removes most of the NIL elements.
+;;; Recursing can return an empty list, which is not removed
+(defun removeNILMost (L)
+            ;; Base case, return NIL if the list is empty
+    (cond   ((NULL L) NIL) 
+            ;; If the first element is NIL, remove it and recursively process the remainder
+            ((NULL (CAR L)) (removeNILMost (CDR L)))
+            ;; If the first element is a list, recurse on both that sub-list and the remainder of the top level list
+            ((LISTP (CAR L)) (CONS (removeNILMost (CAR L)) (removeNILMost (CDR L))))
+            ;; Otherwise, return the first element combined with the recursively processed rest of the list
+          (T (CONS (CAR L) (removeNILMost (CDR L))))
+    )
+)
+
+;;; Accepts a list and reverses only the top level elements
+(defun reverseTop (L)
+            ;; Base case, return NIL if the list is empty
+    (cond   ((NULL L) NIL)
+            ;; If the CDR of the list is itself a list, recursively process it and append the old first element to that result
+            ((LISTP (CDR L)) (APPEND (reverseTop (CDR L)) (CONS (CAR L) ())))
+            ;; Otherwise, return the remaining elements reversed
+          (T (LIST (CDR L) (CAR L)))
+    )
+)
+
+;;; Accepts a list and reverses both the top level, as well as recursively reversing into sublists
+(defun reverseAll (L)
+            ;; Base case, return NIL if the list is empty
+    (cond ((NULL L) NIL)
+            ;; If the CAR of L is a list, recursively reverse it and the rest of the list, then swap their order
+            ((LISTP (CAR L)) (APPEND (reverseAll (CDR L)) (CONS (reverseAll (CAR L)) ())))
+            ;; If the first element is not a list and CDR of the list is, recursively process it and append the old first element to that result
+            ((LISTP (CDR L)) (APPEND (reverseAll (CDR L)) (CONS (CAR L) ())))
+            ;; Otherwise, swap the remaining elements (one of which may be NIL) and return
+          (T (LIST (CDR L) (CAR L)))
+    )
+)
+
+;;; Accepts a list and returns true if it is a palindrome on the top level, NIL otherwise
+(defun palindrome (L)
+            ;; Base case #1, return NIL if the list is empty
+    (cond   ((NULL L) NIL)
+            ;; Base case #2, if the CDR is empty, then there is only one element in the list, and it is therefore a palindrome
+            ((NULL (CDR L)) T)
+            ;; Otherwise, the list is a palindrome if the CAR of L is the same as the CAR of L reversed
+            ;; AND if the same holds true of for the list with the first and last elements removed
+            (T (AND (EQ (CAR L) (CAR (reverseTop L))) (palindrome (CDR (reverseTop (CDR L))))))
+    )
+)
+
+;;; Similar to removeNilMost, but will remove all NIL resulting from empty sub-lists
+(defun removeNILAll (L)
+            ;; Base case, return NIL if the list is empty
+    (cond   ((NULL L) NIL)
+            ;; If the CAR of L is NIL, remove it by only recursing on the remaining elements
+            ((NULL (CAR L))  (removeNILAll (CDR L)))
+            ;; If the CAR of L is a list, recursively process both the CAR and the CDR, then use removeNILMost to remove leftover NILd
+            ((LISTP (CAR L)) (removeNILMost (CONS (removeNILAll (CAR L)) (removeNILAll(CDR L)))))
+            ;; Otherwise, add the CAR back to the recursively processed CDR
+            (T  (CONS (CAR L) (removeNILAll (CDR L))))
+    )
+)

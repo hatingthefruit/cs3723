@@ -1,0 +1,186 @@
+ebq929@fox03:~/cs3723/asn6$ clisp
+  i i i i i i i       ooooo    o        ooooooo   ooooo   ooooo
+  I I I I I I I      8     8   8           8     8     o  8    8
+  I  \ `+' /  I      8         8           8     8        8    8
+   \  `-+-'  /       8         8           8      ooooo   8oooo
+    `-__|__-'        8         8           8           8  8
+        |            8     o   8           8     o     8  8
+  ------+------       ooooo    8oooooo  ooo8ooo   ooooo   8
+
+Welcome to GNU CLISP 2.49 (2010-07-07) <http://clisp.cons.org/>
+
+Copyright (c) Bruno Haible, Michael Stoll 1992, 1993
+Copyright (c) Bruno Haible, Marcus Daniels 1994-1997
+Copyright (c) Bruno Haible, Pierpaolo Bernardi, Sam Steingold 1998
+Copyright (c) Bruno Haible, Sam Steingold 1999-2000
+Copyright (c) Sam Steingold, Bruno Haible 2001-2010
+
+Type :h and hit Enter for context help.
+
+[1]> (load "hw6Lisp.txt" :echo T :print T)
+;; Loading file hw6Lisp.txt ...
+
+;;; Accepts a list, does a shallow removal of all nil at the top level of the list passed as an argument
+(defun removeNILTop (L)
+            ;; Base condition; if L is NIL, return NIL
+    (cond ((NULL L) NIL) 
+            ;; If the first element is NIL, remove it and recursively process the rest of the list
+            ((NULL (CAR L)) (removeNILTop (CDR L))) 
+            ;; Otherwise, add the first element to the recursively processed rest of the list
+            (T (CONS (CAR L) (removeNILTop (CDR L)))) 
+    )
+)
+REMOVENILTOP
+
+
+;;; Accepts a list, recursively removes most of the NIL elements.
+;;; Recursing can return an empty list, which is not removed
+(defun removeNILMost (L)
+            ;; Base case, return NIL if the list is empty
+    (cond   ((NULL L) NIL) 
+            ;; If the first element is NIL, remove it and recursively process the remainder
+            ((NULL (CAR L)) (removeNILMost (CDR L)))
+            ;; If the first element is a list, recurse on both that sub-list and the remainder of the top level list
+            ((LISTP (CAR L)) (CONS (removeNILMost (CAR L)) (removeNILMost (CDR L))))
+            ;; Otherwise, return the first element combined with the recursively processed rest of the list
+          (T (CONS (CAR L) (removeNILMost (CDR L))))
+    )
+)
+REMOVENILMOST
+
+
+;;; Accepts a list and reverses only the top level elements
+(defun reverseTop (L)
+            ;; Base case, return NIL if the list is empty
+    (cond   ((NULL L) NIL)
+            ;; If the CDR of the list is itself a list, recursively process it and append the old first element to that result
+            ((LISTP (CDR L)) (APPEND (reverseTop (CDR L)) (CONS (CAR L) ())))
+            ;; Otherwise, return the remaining elements reversed
+          (T (LIST (CDR L) (CAR L)))
+    )
+)
+REVERSETOP
+
+
+;;; Accepts a list and reverses both the top level, as well as recursively reversing into sublists
+(defun reverseAll (L)
+            ;; Base case, return NIL if the list is empty
+    (cond ((NULL L) NIL)
+            ;; If the CAR of L is a list, recursively reverse it and the rest of the list, then swap their order
+            ((LISTP (CAR L)) (APPEND (reverseAll (CDR L)) (CONS (reverseAll (CAR L)) ())))
+            ;; If the first element is not a list and CDR of the list is, recursively process it and append the old first element to that result
+            ((LISTP (CDR L)) (APPEND (reverseAll (CDR L)) (CONS (CAR L) ())))
+            ;; Otherwise, swap the remaining elements (one of which may be NIL) and return
+          (T (LIST (CDR L) (CAR L)))
+    )
+)
+REVERSEALL
+
+
+;;; Accepts a list and returns true if it is a palindrome on the top level, NIL otherwise
+(defun palindrome (L)
+            ;; Base case #1, return NIL if the list is empty
+    (cond   ((NULL L) NIL)
+            ;; Base case #2, if the CDR is empty, then there is only one element in the list, and it is therefore a palindrome
+            ((NULL (CDR L)) T)
+            ;; Otherwise, the list is a palindrome if the CAR of L is the same as the CAR of L reversed
+            ;; AND if the same holds true of for the list with the first and last elements removed
+            (T (AND (EQ (CAR L) (CAR (reverseTop L))) (palindrome (CDR (reverseTop (CDR L))))))
+    )
+)
+PALINDROME
+
+
+;;; Similar to removeNilMost, but will remove all NIL resulting from empty sub-lists
+(defun removeNILAll (L)
+            ;; Base case, return NIL if the list is empty
+    (cond   ((NULL L) NIL)
+            ;; If the CAR of L is NIL, remove it by only recursing on the remaining elements
+            ((NULL (CAR L))  (removeNILAll (CDR L)))
+            ;; If the CAR of L is a list, recursively process both the CAR and the CDR, then use removeNILMost to remove leftover NILd
+            ((LISTP (CAR L)) (removeNILMost (CONS (removeNILAll (CAR L)) (removeNILAll(CDR L)))))
+            ;; Otherwise, add the CAR back to the recursively processed CDR
+            (T  (CONS (CAR L) (removeNILAll (CDR L))))
+    )
+)
+REMOVENILALL
+;; Loaded file hw6Lisp.txt
+T
+[2]> (load "HW6LispRun.txt" :echo T :print T)
+;; Loading file HW6LispRun.txt ...
+;;;  #1 removeNILTop
+
+(removeNILTop '(NIL X NIL NIL Y  NIL Z))
+(X Y Z)
+
+(removeNILTop '(X NIL Y NIL Z NIL))
+(X Y Z)
+
+(removeNILTop '(NIL (X NIL Y) (NIL NIL)))
+((X NIL Y) (NIL NIL))
+
+
+;;; #2 removeNILMost
+
+(removeNILMost '(NIL X NIL NIL Y  NIL Z))
+(X Y Z)
+
+(removeNILMost '(X NIL (Y NIL Z) NIL))
+(X (Y Z))
+
+(removeNILMost '(NIL (NIL) (X NIL Y) (NIL NIL) Z))
+(NIL (X Y) NIL Z)
+
+(removeNILMost '(NIL ( (((((NIL) NIL)))))))
+((((((NIL))))))
+
+
+;;; #3 reverseTop
+
+(reverseTop '(X Y Z))
+(Z Y X)
+
+(reverseTop '(X (Y Z (A)) (W)))
+((W) (Y Z (A)) X)
+
+
+;;; #4 reverseALL
+
+(reverseAll '(X Y Z))
+(Z Y X)
+
+(reverseAll '(X (Y Z (A)) (W)))
+((W) ((A) Z Y) X)
+
+
+;;; #5 palindrome
+
+(palindrome '(R A C E C A R))
+T
+
+(palindrome '(W A S I T A C A R O R A C A T I S A W))
+T
+
+(palindrome '(N I X O N))
+NIL
+
+
+
+;; Loaded file HW6LispRun.txt
+T
+[3]> (load "HW6LispExtraRun.txt" :echo T :print T)
+;; Loading file HW6LispExtraRun.txt ...
+(removeNILAll '(NIL (NIL) (X NIL Y) (NIL NIL) Z))
+((X Y) Z)
+
+(removeNILAll '(NIL ( (((((NIL) NIL)))))))
+NIL
+
+(removeNILAll '(NIL (X (NIL) Y) ((NIL)) ))
+((X Y))
+
+(removeNILAll '(NIL (((X ((((((((((NIL)))))))))) Y) Z) W) (((NIL))) ))
+((((X Y) Z) W))
+;; Loaded file HW6LispExtraRun.txt
+T
+[4]> 
