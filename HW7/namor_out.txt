@@ -1,0 +1,17 @@
+./namor.py CCCXIV
+CCCXIV is 314
+./namor.py MCMXCIX
+MCMXCIX is 1999
+./namor.py CXXXXI
+CXXXXI is -1
+./namor.py 123 MMMM II
+123 is -1
+MMMM is -1
+II is 2
+./namor.py mmm ii
+MMM is 3000
+II is 2
+./namor.py ccxiv
+CCXIV is 214
+./namor.py cmxiv
+CMXIV is 914

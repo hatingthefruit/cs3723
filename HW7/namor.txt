@@ -1,0 +1,6 @@
+./namor.py CCCXIV
+./namor.py MCMXCIX
+./namor.py CXXXXI
+./namor.py 123 MMMM II
+./namor.py mmm ii
+./namor.py ccxiv

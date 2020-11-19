@@ -1,0 +1,6 @@
+./roman.py 123 -10
+./roman.py 4234 212 324
+./roman.py 2315
+./roman.py 1234
+./roman.py 8675
+./roman.py 865

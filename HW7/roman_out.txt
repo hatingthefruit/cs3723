@@ -1,0 +1,15 @@
+./roman.py 123 -10
+123 is CXXIII
+-10 is Error
+./roman.py 4234 212 324
+4234 is Error
+212 is CCXII
+324 is CCCXXIV
+./roman.py 2315
+2315 is MMCCCXV
+./roman.py 1234
+1234 is MCCXXXIV
+./roman.py 8675
+8675 is Error
+./roman.py 865
+865 is DCCCLXV
